@@ -1,6 +1,25 @@
 # Test Project for Reproducible Builds on iOS
 This is a sample app, custom Swift toolchain and comparison tools to investigate reproducible builds for iOS apps.
 
+## Current Results
+All builds were done with debug symbols and bitcode generation disabled in the project build settings.
+### Default Toolchain
+With the default toolchain, some object files differ by a large amount, e.g. `ZIPFoundation.o` differs by ~80% between builds. Some object files also differ slightly in file size.
+```
+200709-180814/deriveddata/Build/Intermediates.noindex/ArchiveIntermediates/Repro/IntermediateBuildFilesPath/ZIPFoundation.build/Release-iphoneos/ZIPFoundation.build/Objects-normal/armv7/Binary/ZIPFoundation.o
+Sizes: 1174304 1174300, diff: 4
+945727 of 1174300 bytes differ. 80.535382%
+```
+
+### Custom Toolchain
+With the modified toolchain, the same files differ by less than 1%. All files have the exact same size.
+
+```
+200709-181422/deriveddata/Build/Intermediates.noindex/ArchiveIntermediates/Repro/IntermediateBuildFilesPath/ZIPFoundation.build/Release-iphoneos/ZIPFoundation.build/Objects-normal/armv7/Binary/ZIPFoundation.o
+Sizes: 323120 323120, diff: 0
+9 of 323120 bytes differ. 0.002785%
+```
+
 ## Reproducibility on iOS
 Buliding the same app twice on the same system results in functionally identical but different outputs.  
 Two major factors in this are embedded bitcode and debug symbols.  
@@ -26,21 +45,4 @@ This test compares the output of `objdump -full-contents -macho` for the resulti
 This test compares the resulting binaries using the included bindiff tool.
 
 
-## Current Results
-All builds were done with debug symbols and bitcode generation disabled in the project build settings.
-### Default Toolchain
-With the default toolchain, some object files differ by a large amount, e.g. `ZIPFoundation.o` differs by ~80% between builds. Some object files also differ slightly in file size.
-```
-200709-180814/deriveddata/Build/Intermediates.noindex/ArchiveIntermediates/Repro/IntermediateBuildFilesPath/ZIPFoundation.build/Release-iphoneos/ZIPFoundation.build/Objects-normal/armv7/Binary/ZIPFoundation.o
-Sizes: 1174304 1174300, diff: 4
-945727 of 1174300 bytes differ. 80.535382%
-```
 
-### Custom Toolchain
-With the modified toolchain, the same files differ by less than 1%. All files have the exact same size.
-
-```
-200709-181422/deriveddata/Build/Intermediates.noindex/ArchiveIntermediates/Repro/IntermediateBuildFilesPath/ZIPFoundation.build/Release-iphoneos/ZIPFoundation.build/Objects-normal/armv7/Binary/ZIPFoundation.o
-Sizes: 323120 323120, diff: 0
-9 of 323120 bytes differ. 0.002785%
-```
