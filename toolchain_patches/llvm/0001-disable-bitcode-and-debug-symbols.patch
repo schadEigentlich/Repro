@@ -1,0 +1,47 @@
+From e8e0962b6cdfd9697b6c2dc977fff1bccead4e15 Mon Sep 17 00:00:00 2001
+From: Daniel Gstoehl <gstoehl@ubique.ch>
+Date: Mon, 6 Jul 2020 16:15:40 +0200
+Subject: [PATCH] disable bitcode and debug symbols
+
+---
+ clang/lib/CodeGen/BackendUtil.cpp         | 5 +++--
+ llvm/lib/Bitcode/Writer/BitcodeWriter.cpp | 4 +++-
+ 2 files changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/clang/lib/CodeGen/BackendUtil.cpp b/clang/lib/CodeGen/BackendUtil.cpp
+index 3989ac31310..fbc01ac10c3 100644
+--- a/clang/lib/CodeGen/BackendUtil.cpp
++++ b/clang/lib/CodeGen/BackendUtil.cpp
+@@ -1574,10 +1574,11 @@ void clang::EmitBackendOutput(DiagnosticsEngine &Diags,
+ // __LLVM,__bitcode section.
+ void clang::EmbedBitcode(llvm::Module *M, const CodeGenOptions &CGOpts,
+                          llvm::MemoryBufferRef Buf) {
+-  if (CGOpts.getEmbedBitcode() == CodeGenOptions::Embed_Off)
++/*  if (CGOpts.getEmbedBitcode() == CodeGenOptions::Embed_Off)
+     return;
+   llvm::EmbedBitcodeInModule(
+       *M, Buf, CGOpts.getEmbedBitcode() != CodeGenOptions::Embed_Marker,
+       CGOpts.getEmbedBitcode() != CodeGenOptions::Embed_Bitcode,
+-      &CGOpts.CmdArgs);
++      &CGOpts.CmdArgs);*/
++return;
+ }
+diff --git a/llvm/lib/Bitcode/Writer/BitcodeWriter.cpp b/llvm/lib/Bitcode/Writer/BitcodeWriter.cpp
+index e789e9b35af..76b57771bdd 100644
+--- a/llvm/lib/Bitcode/Writer/BitcodeWriter.cpp
++++ b/llvm/lib/Bitcode/Writer/BitcodeWriter.cpp
+@@ -4717,8 +4717,10 @@ static const char *getSectionNameForCommandline(const Triple &T) {
+ }
+ 
+ void llvm::EmbedBitcodeInModule(llvm::Module &M, llvm::MemoryBufferRef Buf,
+-                                bool EmbedBitcode, bool EmbedMarker,
++                                bool EmbedBitcode_, bool EmbedMarker_,
+                                 const std::vector<uint8_t> *CmdArgs) {
++	bool EmbedBitcode = false;
++	bool EmbedMarker = false;
+   // Save llvm.compiler.used and remove it.
+   SmallVector<Constant *, 2> UsedArray;
+   SmallPtrSet<GlobalValue *, 4> UsedGlobals;
+-- 
+2.27.0
+

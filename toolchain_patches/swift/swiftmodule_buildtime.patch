@@ -1,0 +1,15 @@
+diff --git a/lib/Driver/Compilation.cpp b/lib/Driver/Compilation.cpp
+index b4829ab4b40..c36724f9369 100644
+--- a/lib/Driver/Compilation.cpp
++++ b/lib/Driver/Compilation.cpp
+@@ -1699,8 +1699,8 @@ static void writeCompilationRecord(StringRef path, StringRef argsHash,
+       << "\"\n";
+   out << compilation_record::getName(TopLevelKey::Options) << ": \""
+       << llvm::yaml::escape(argsHash) << "\"\n";
+-  out << compilation_record::getName(TopLevelKey::BuildTime) << ": ";
+-  writeTimeValue(out, buildTime);
++  out << compilation_record::getName(TopLevelKey::BuildTime) << ": [0, 0]";
++  
+   out << "\n";
+   out << compilation_record::getName(TopLevelKey::Inputs) << ":\n";
+ 
