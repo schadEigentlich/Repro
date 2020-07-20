@@ -1,6 +1,6 @@
 #!/bin/bash
 if [[ $1 = "custom" ]]; then
-   TOOLCHAIN="TEST.20200623"
+   TOOLCHAIN="TEST.20200715"
 elif [[ $1 = "default" ]]; then
    TOOLCHAIN=""
 else

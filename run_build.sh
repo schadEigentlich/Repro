@@ -1,6 +1,6 @@
 #!/bin/bash
 if [[ $1 != "" ]]; then
-   TOOLCHAIN="-toolchain TEST.20200623"
+   TOOLCHAIN="-toolchain $1"
 fi 
 
-xcodebuild -project Repro.xcodeproj $TOOLCHAIN -scheme 'Repro' -destination 'generic/platform=iOS' -archivePath ./build/archive.xarchive -derivedDataPath  './build/deriveddata' clean archive
+xcodebuild -project Repro.xcodeproj $TOOLCHAIN -scheme 'Repro' -destination 'generic/platform=iOS' -archivePath ./build/archive.xarchive -allowProvisioningUpdates -derivedDataPath  './build/deriveddata' clean archive
