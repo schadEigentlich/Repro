@@ -1,0 +1,132 @@
+diff --git a/lib/Basic/Statistic.cpp b/lib/Basic/Statistic.cpp
+index d05b9767572..0ed3f0e8b89 100644
+--- a/lib/Basic/Statistic.cpp
++++ b/lib/Basic/Statistic.cpp
+@@ -54,9 +54,7 @@ using namespace llvm;
+ using namespace llvm::sys;
+ 
+ bool environmentVariableRequestedMaximumDeterminism() {
+-  if (const char *S = ::getenv("SWIFTC_MAXIMUM_DETERMINISM"))
+-    return (S[0] != '\0');
+-  return false;
++	return true;
+ }
+ 
+ static std::string
+diff --git a/lib/Driver/Compilation.cpp b/lib/Driver/Compilation.cpp
+index cf532355605..06f7f7a625a 100644
+--- a/lib/Driver/Compilation.cpp
++++ b/lib/Driver/Compilation.cpp
+@@ -1699,8 +1699,8 @@ static void writeCompilationRecord(StringRef path, StringRef argsHash,
+       << "\"\n";
+   out << compilation_record::getName(TopLevelKey::Options) << ": \""
+       << llvm::yaml::escape(argsHash) << "\"\n";
+-  out << compilation_record::getName(TopLevelKey::BuildTime) << ": ";
+-  writeTimeValue(out, buildTime);
++  out << compilation_record::getName(TopLevelKey::BuildTime) << ": [0, 0]";
++  
+   out << "\n";
+   out << compilation_record::getName(TopLevelKey::Inputs) << ":\n";
+ 
+diff --git a/lib/Driver/Driver.cpp b/lib/Driver/Driver.cpp
+index 4f38b90bd1b..b3f78c26036 100644
+--- a/lib/Driver/Driver.cpp
++++ b/lib/Driver/Driver.cpp
+@@ -500,8 +500,10 @@ populateOutOfDateMap(InputInfoMap &map, llvm::sys::TimePoint<> &LastBuildTime,
+     if (!secondsRaw)
+       return true;
+     std::time_t parsedSeconds;
+-    if (secondsRaw->getValue(scratch).getAsInteger(10, parsedSeconds))
++    if (secondsRaw->getValue(scratch).getAsInteger(10, parsedSeconds)){
++parsedSeconds = 0;
+       return true;
++}
+ 
+     ++seqI;
+     if (seqI == seqE)
+@@ -517,7 +519,8 @@ populateOutOfDateMap(InputInfoMap &map, llvm::sys::TimePoint<> &LastBuildTime,
+     ++seqI;
+     if (seqI != seqE)
+       return true;
+-
++	parsedSeconds = 0;
++parsedNanoseconds = 0;
+     timeValue = llvm::sys::TimePoint<>(std::chrono::seconds(parsedSeconds));
+     timeValue += std::chrono::nanoseconds(parsedNanoseconds);
+     return false;
+@@ -1593,7 +1596,7 @@ void Driver::buildOutputInfo(const ToolChain &TC, const DerivedArgList &Args,
+   assert(OI.CompilerOutputType != file_types::ID::TY_INVALID);
+ 
+   if (const Arg *A = Args.getLastArg(options::OPT_g_Group)) {
+-    if (A->getOption().matches(options::OPT_g))
++/*    if (A->getOption().matches(options::OPT_g))
+       OI.DebugInfoLevel = IRGenDebugInfoLevel::Normal;
+     else if (A->getOption().matches(options::OPT_gline_tables_only))
+       OI.DebugInfoLevel = IRGenDebugInfoLevel::LineTables;
+@@ -1601,7 +1604,7 @@ void Driver::buildOutputInfo(const ToolChain &TC, const DerivedArgList &Args,
+       OI.DebugInfoLevel = IRGenDebugInfoLevel::DwarfTypes;
+     else
+       assert(A->getOption().matches(options::OPT_gnone) &&
+-             "unknown -g<kind> option");
++             "unknown -g<kind> option");*/
+   }
+ 
+   if (const Arg *A = Args.getLastArg(options::OPT_debug_info_format)) {
+diff --git a/lib/Driver/ToolChains.cpp b/lib/Driver/ToolChains.cpp
+index 3edcaa7bee2..9c302e63934 100644
+--- a/lib/Driver/ToolChains.cpp
++++ b/lib/Driver/ToolChains.cpp
+@@ -297,13 +297,13 @@ void ToolChain::addCommonFrontendArgs(const OutputInfo &OI,
+ 
+   // -g implies -enable-anonymous-context-mangled-names, because the extra
+   // metadata aids debugging.
+-  if (inputArgs.hasArg(options::OPT_g)) {
++/*  if (inputArgs.hasArg(options::OPT_g)) {
+     // But don't add the option in optimized builds: it would prevent dead code
+     // stripping of unused metadata.
+     auto OptArg = inputArgs.getLastArgNoClaim(options::OPT_O_Group);
+     if (!OptArg || OptArg->getOption().matches(options::OPT_Onone))
+       arguments.push_back("-enable-anonymous-context-mangled-names");
+-  }
++  }*/
+ 
+   // Pass through any subsystem flags.
+   inputArgs.AddAllArgs(arguments, options::OPT_Xllvm);
+diff --git a/lib/Frontend/CompilerInvocation.cpp b/lib/Frontend/CompilerInvocation.cpp
+index 3df1afbf8be..e52dc8a992b 100644
+--- a/lib/Frontend/CompilerInvocation.cpp
++++ b/lib/Frontend/CompilerInvocation.cpp
+@@ -1298,7 +1298,7 @@ static bool ParseIRGenArgs(IRGenOptions &Opts, ArgList &Args,
+                            const llvm::Triple &Triple) {
+   using namespace options;
+ 
+-  if (!SILOpts.SILOutputFileNameForDebugging.empty()) {
++/*  if (!SILOpts.SILOutputFileNameForDebugging.empty()) {
+       Opts.DebugInfoLevel = IRGenDebugInfoLevel::LineTables;
+   } else if (const Arg *A = Args.getLastArg(OPT_g_Group)) {
+     if (A->getOption().matches(OPT_g))
+@@ -1310,7 +1310,7 @@ static bool ParseIRGenArgs(IRGenOptions &Opts, ArgList &Args,
+     else
+       assert(A->getOption().matches(options::OPT_gnone) &&
+              "unknown -g<kind> option");
+-  }
++  }*/
+   if (Opts.DebugInfoLevel >= IRGenDebugInfoLevel::LineTables) {
+     if (Args.hasArg(options::OPT_debug_info_store_invocation)) {
+       ArgStringList RenderedArgs;
+diff --git a/lib/Serialization/Serialization.cpp b/lib/Serialization/Serialization.cpp
+index aab9171e63e..8c21d85ebba 100644
+--- a/lib/Serialization/Serialization.cpp
++++ b/lib/Serialization/Serialization.cpp
+@@ -959,8 +959,9 @@ static void flattenImportPath(const ModuleDecl::ImportedModule &import,
+ }
+ 
+ uint64_t getRawModTimeOrHash(const SerializationOptions::FileDependency &dep) {
+-  if (dep.isHashBased()) return dep.getContentHash();
+-  return dep.getModificationTime();
++/*  if (dep.isHashBased()) return dep.getContentHash();
++  return dep.getModificationTime();*/
++return 0;
+ }
+ 
+ using ImportSet = llvm::SmallSet<ModuleDecl::ImportedModule, 8,

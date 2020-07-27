@@ -1,0 +1,15 @@
+diff --git a/lib/Basic/Statistic.cpp b/lib/Basic/Statistic.cpp
+index 762e31050ca..d4a7f359959 100644
+--- a/lib/Basic/Statistic.cpp
++++ b/lib/Basic/Statistic.cpp
+@@ -55,9 +55,7 @@ using namespace llvm;
+ using namespace llvm::sys;
+ 
+ bool environmentVariableRequestedMaximumDeterminism() {
+-  if (const char *S = ::getenv("SWIFTC_MAXIMUM_DETERMINISM"))
+-    return (S[0] != '\0');
+-  return false;
++	return true;
+ }
+ 
+ static std::string

@@ -1,6 +1,7 @@
 #!/bin/bash
+export ZERO_AR_DATE=1
 if [[ $1 = "custom" ]]; then
-   TOOLCHAIN="TEST.20200715"
+   TOOLCHAIN="org.swift.50202007221a"
 elif [[ $1 = "default" ]]; then
    TOOLCHAIN=""
 else
