@@ -1,5 +1,5 @@
 # Test Project for Reproducible Builds on iOS
-This is a sample app, custom Swift toolchain and comparison tools to investigate reproducible builds for iOS apps.
+This is a sample app, custom Swift toolchain and comparison tools to investigate reproducible builds for iOS apps. The root of the repository contains a simple iOS app which does nothing useful but has some dependencies added throught Swift Package Manager. The toolchain_patches directory contains patches for individual components of the Swift toolchain. The release section has prebuilt toolchains with these patches already applied. 
 
 ## Current Results
 All builds were done with debug symbols and bitcode generation disabled in the project build settings.
